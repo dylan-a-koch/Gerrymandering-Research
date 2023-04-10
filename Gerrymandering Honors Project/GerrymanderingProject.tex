@@ -1,0 +1,255 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage, amsmath, float, subfigure}
+\usepackage{graphicx}
+\graphicspath{ {/home/dylan/Pictures/} }
+
+\title{Detecting Gerrymandering Using Proportions}
+\author{Dylan Koch}
+\date{\today}
+
+\begin{document}
+	\maketitle
+	
+
+	
+	\section{A Primer on Gerrymandering}
+	Gerrymandering, as defined by the supreme court, is ``drawing. . . district lines to subordinate adherents of
+	one political party and entrench a rival party in
+	power."\cite{bondurant}	Imagine a theoretical state that needs to have 10 voting districts drawn. If 60\% of the population is registered for the Democratic party, then you would expect that 6 of those districts would be predominantly Democratic voters.  However, if an opposing party held the ability to draw the map, they could Gerrymander the districts, ensuring they would get the majority of the districts, not the Democrats.  This often results in oddly shaped districts whose shape makes no sense, and leads to poor voter representation.	
+	\\
+	\\
+	Gerrymandering gets its name from Elbridge Gerry, the governor of Massachusetts who signed into effect a bill, redrawing one of his states districts.\cite{trickey}  This district was so horribly misshapen that it received tremendous political backlash, and even some political cartoons such as the one printed in the Boston Gazette on March 26, 1812 as shown in Figure 1. 
+		\begin{figure}[H]
+			\centering
+		\includegraphics[scale=0.3]{gerrymander-cartoon.png}
+		\caption{A political cartoon depicting the ``gerrymander"}
+	\end{figure}
+	
+	
+	\noindent
+	These days, a number of strategies are employed by politicians to ensure their party gets the majority.  However, the fundamental complementary methods of gerrymandering are``packing and cracking."  Packing refers to the practice of taking as many voters of a certain party as possible, and packing them into a single district. \cite{pierce}  Cracking is the exact opposite, and refers to the splitting up a given parties voters into several districts so their effect is diluted, making it so no one district feels their presence. \cite{pierce}
+	\\
+	\\
+	If a given state has a large amount of a given party, but their opposition is looking to gerrymander the districts, packing is the best strategy, as it limits the damage those voters can do.  However, if the population of the opposing party is not overwhelming, it is then in the best interest of the party drawing the map to``get cracking" as it were, perhaps denying their opposition from garnering even a single representative.
+	\\ \\
+	There has been much debate as to whether or not partisan gerrymandering is a constitutional practice.  This is a unique conundrum, as it is an established legal precedent that racial gerrymandering is unconstitutional, as is evidenced in cases such as \emph{Cooper v. Harris}.\cite{fourteen}  Yet, curiously, court cases such as \emph{Gill v. Whitford}, a case which called to question how a state could fall to a different majority suddenly after forty years of consistency, was thrown out by the supreme court, as there is no precedent that justifies claiming damages based on voting results. \cite{gill}
+	\\
+	\\
+	In spite of the lack of political grounds to condemn gerrymandering, it is my opinion that since this practice goes against the spirit of a representative government, it is therefore an unconstitutional act.  We would not allow someone to tamper with election results after they have been cast, but we in essence allow the same effect by allowing the representatives to choose their voters and not the other way around.
+	\\
+	\\Due to shifts in population and demographics, it is required that every ten years, census data is used to redraw district maps in hopes to keep the people's opinions represented.  However, since the districts are redrawn by whomever currently holds the majority of state legislators, it is clear that there is an incentive to use the data to gerrymander the districts, so you keep as much political power as possible, making the issue tremendously difficult to avoid in our current political system. 
+	\\
+	\\This lead me to wonder what the best way to stop Gerrymandering could be.  I believe through the use of proportions we can develop a model that would keep in mind, based on census data, what percentage of a states districts should go to each party.  Thus, in cases where the expected is vastly different from the actual representation, we could then look to the district's area, and determine if the state has been tampered with.
+	
+	\section{A Proposed Solution}
+	For simplification's sake, suppose we have a given state whose voters must either register as a Democrat or a Republican (i.e. no abstention or third party voters).  
+	
+	\noindent
+	We want to narrow down which states should be examined for partisan Gerrymandering.  This can be done by 
+	\begin{enumerate}
+		\item Getting the amount of registered voters for each party
+		\item Calculating what percent of the population each party represents
+		\item Use that proportion to get an expected number of districts that should go to each party
+		\item Get the actual number of districts that went to each party, and use the formula \[\left|\frac{(N_e - N_a)}{N_e}\right|\] where $N_e$ and $N_a$ represent the expected number of districts and the actual number of districts respectively to give us a percent error.
+	\end{enumerate}
+	To simplify step 3, since it is highly unlikely that we will get whole numbers for the number of districts expected to go to each, we will use standard rounding to accommodate. This is to say if given ten districts the Democrats are expected to get 7.8 districts, we will give them 8 expected and the Republicans 2.
+	\\
+	\\We will say any state who has a percent error of greater than 25\% should be examined further to see if there is evidence of gerrymandering.  We allow error here, because the voting population does not always vote for the representative from their party.  Any percent error above this threshold we will consider suspicious, and we will move on to our second test.
+	\\
+	\\Once we have determined a state's map to be a possible case of gerrymandering, we will go district by district, and perform the following algorithm:
+	\begin{enumerate}
+		\item \textbf{Calculate the length of the district.}
+		\\The districts length will be equal the distance between the two furthest latitude and longitude points contained in the district accross a straight line.
+		\item \textbf{Use this length as the diameter of a circle, and get the area of that circle.}
+		\\This will be used as the ideal amount of area we would want a district of that length to cover.
+		\item \textbf{Get the actual area covered by this district.}
+		\\This will be used to set up our proportion.
+		\item\textbf{Calculate what percent of the ideal area is covered by the district.}
+		\\This will help us see if the district is much too long for how much area it covers.
+		\item\textbf{Find the average percent covered.}
+	\end{enumerate} 
+	Any state whose districts average below 40\% of the ideal area will be flagged as gerrymandered, and thus we should consider redrawing, as the voters are not being accurately represented, and the districts are evidently oddly shaped, which is a tell tale sign of Gerrymandering.
+	\\
+	\\It is worth noting that we will allow the 40\% because sometimes geographic restrictions prevent 'nicely' shaped districts.
+
+	\section{Test Cases: New Jersey and North Carolina}
+	In order to validate our model, we will perform two tests, one on a state who is well known for maintaining a fair map, and one state who has been subject to questioning regarding their district map, namely New Jersey and North Carolina, respectively.  
+	\\
+	\\Data was calculated using district maps and population statistics provided by the US census.
+	\subsection{New Jersey}
+	New Jersey has 12 eligible districts based on its population.
+	\\ \\
+	Based on the 2016 Elections we see the following data for our first test\cite{njcensus}:
+	\begin{center}
+		\begin{tabular}{ c  c  c  c }
+			
+			\textbf{Party} & \textbf{Percent Registered} & \textbf{Expected Districts} & \textbf{Actual Districts}\\ 
+			\hline
+			Democrat & 63.2\% & 8 & 7\\
+			
+			Republican & 36.8\% & 4 & 5\\
+			\hline
+		\end{tabular}
+	
+	\end{center}
+
+	\noindent
+	Using this data, we can calculate our percent errors:
+	\[\text{Democrat} \Rightarrow \left|\frac{8 - 7}{8}\right| = .125\]
+	\[ \text{Republican} \Rightarrow \left|\frac{4 - 5}{4}\right| = .25\]
+	\[\text{Average Error} \Rightarrow \frac{.125 + .25}{2} = .1875\]
+	
+	So, New Jersey's district error is only $18.75\%$, which would not require us to test the districts individually, but just to make sure this is a valid litmus test, let us look at the districts anyway.
+	
+	Using the district maps provided by the US census, we ascertain the following table of data\cite{njdistrictdata}:
+	\begin{center}
+		\begin{tabular}{ c  c  c  c  c }
+			
+			\textbf{District} & 
+			\textbf{Length(mi)} & \textbf{Ideal Area(mi$^2$)} & \textbf{Actual Area(mi$^2$)} & \textbf{Percent of Area} \\
+			\hline
+			1 & 52 & 2123.71 & 906.55 & 42.69\%\\
+			
+			2 & 75 & 4417.86 & 2092.43 & 47.36\%\\
+			
+			3 & 51.4 &  2074.99& 899.70 & 43.36\%\\
+			
+			4 & 42 & 1385.44 & 691.88 & 49.94\%\\
+			
+			5 & 65 & 3318.31 & 991.30 & 29.87\%\\
+			
+			6 & 32 & 804.25 & 215.55 & 26.80\%\\
+			
+			7 & 50 & 1963.49 & 970.19 & 49.41\%\\
+			
+			8 & 18 & 254.47 & 54.69 & 21.49\%\\
+			
+			9 & 11.7 & 107.51 & 95.30 & 88.64\%\\
+			
+			10 & 20 & 314.16 & 75.92 & 24.17\%\\
+			
+			11 & 26 & 530.93 & 504.97 & 95.11\%\\
+			
+			12 & 36.8 & 1063.62 & 412.23 & 38.76\%\\
+			\hline
+		\end{tabular}
+	\end{center}
+	
+	\noindent
+	When we average all the percentages, we get an average percent area used $46.47\%$
+	\\ \\This is above our desired percentage threshold, thus our prediction that New Jersey is not a Gerrymandered state is upheld.
+	
+	\subsection{North Carolina}
+	North Carolina has 13 electoral districts that need to be drawn.  Our assumptions, based on national scrutiny, is that this is a state that will be flagged for Gerrymandering.
+	\\ \\Based on the same census data as from New Jersey, we get the following\cite{nccensus}:
+		\begin{center}
+			\begin{tabular}{ c  c  c  c }
+				
+				\textbf{Party} & \textbf{Percent Registered} & \textbf{Expected Districts} & \textbf{Actual Districts}\\ 
+				\hline
+				Democrat & 55.97\% & 7 & 3\\
+				
+				Republican & 44.03\% & 6 & 10\\
+				\hline
+			\end{tabular}
+		\end{center}
+		
+		\noindent
+		Using this data, we can calculate our percent errors:
+		\[\text{Democrat} \Rightarrow \left|\frac{7 - 3}{7}\right| = .5714\]
+		\[ \text{Republican} \Rightarrow \left|\frac{6 - 10}{6}\right| = .6667\]
+		\[\text{Average Error} \Rightarrow \frac{.6667 + .5714}{2} = .619\]
+		\\This means we have a nearly $62\%$ error, well above our suspicious threshold.  This is easily backed up as good data, as the expected districts gave a slight majority to the Democrats, but in reality, they became a minority to the tune of a 10 to 3 deficit.
+		\\Thus, this test failure would mean we need to look at the districts to see if the areas imply Gerrymandering\cite{ncdistrictdata}:
+			\begin{center}
+				\begin{tabular}{ c  c  c  c  c }
+					
+					\textbf{District} & 
+					\textbf{Length(mi)} & \textbf{Ideal Area(mi$^2$)} & \textbf{Actual Area(mi$^2$)} & \textbf{Percent of Area} \\
+					\hline
+					1 & 157.71 & 19534.77 & 5494.28 & 28.13\%\\
+					
+					2 & 100.57 & 7943.77 & 3246.68 & 40.87\%\\
+					
+					3 & 202.67 & 32260.33 & 7810.08 & 24.21\%\\
+					
+					4 & 131.56 & 13593.70 & 1045.35 & 7.69\%\\
+					
+					5 & 104.73 & 8614.54 & 3571.86 & 41.46\%\\
+					
+					6 & 135.75 & 14473.37 & 3674.55 & 25.39\%\\
+					
+					7 & 132.69 & 13828.22 & 6161.77 & 44.56\%\\
+					
+					8 & 122.86 & 11855.26 & 4512.78 & 38.07\%\\
+					
+					9 & 88 & 6082.12 & 856.93 & 14.09\%\\
+					
+					10 & 97.33 & 7440.18 & 2575.16 & 34.61\%\\
+					
+					11 & 180 & 25446.90 & 6838.24 & 26.87\%\\
+					
+					12 & 106 & 8824.73 & 549.66 & 6.23\%\\
+					
+					13 & 88 & 6082.12 & 2280.53 & 37.50\%\\
+					\hline
+				\end{tabular}
+			\end{center}
+		
+		\noindent
+			Averaging out the area percentages for the North Carolina districts, we get an average of $28.44\%,$ well below our threshold.  Thus, this fails both of our tests, which to us would lead to the decision that we should redraw the map of North Carolina, for there is convincing evidence of Gerrymandering.
+	\section{Final thoughts}
+	
+		\begin{center}
+		\includegraphics[scale = 0.3]{12thDistrict.jpg}
+		
+		\textit{North Carolina's 12th Voting District}
+		
+		
+		
+	\end{center}
+
+
+	\noindent
+		There is an interesting note about the North Carolina districts.  The two districts with the worst area percentage, namely Districts 4 and 12, went to the Democrats.  This seems to cut through very urban areas, thus there appears to be evidence that they who drew the map put all the democrats they could in a single district, thus minimizing their impact on the state's representation.  This, to me, is a clear case of packing, as it is established that urban populations tend to be more democratic.\cite{urban}  Thus if you want to limit the effect of a large democratic population, string them together into the same district.
+		\\ \\So we see this model is able to follow through on predictions, and passes the two aforementioned test cases with no error.  This proves that this is a valid way of detecting Gerrymandering, as we did not need to do work on New Jersey after the first test, but even it passed the second test as well.  I would be interested to find a case where the first test failed and the second test passed, and what lessons we could discern from those results.  But until then, we are left with a solid model, which can act as a new tool to use against Gerrymandering in the future, as no map that fails these two tests should go unobserved.
+		
+		\pagebreak
+		\begin{thebibliography}{10}
+			\bibitem{bondurant}
+			Bondurant II, Emmet J., and Ben W. Thorpe. “The First Amendment Case against Partisan Gerrymandering.” \textit{Georgia Law Review}, vol. 52, no. 4, Summer 2018, pp. 1039–1055. EBSCOhost, search.ebscohost.com/login.aspx?direct=true\&db=a9h\&AN=133873875\&site=ehost-live.
+			
+			\bibitem{fourteen}
+			“Fourteenth Amendment -- Equal Protection Clause -- Racial Gerrymandering -- Cooper v. Harris.” \textit{Harvard Law Review}, vol. 131, no. 1, Nov. 2017, pp. 303–322. EBSCOhost, search.ebscohost.com/login.aspx?direct=true\&db=a9h\&AN=126285738\&site=ehost-live.
+			
+			\bibitem{gill}
+			“Gill v. Whitford.” \textit{Oyez}, www.oyez.org/cases/2017/16-1161.
+			
+			\bibitem{urban}
+			Hendrickson, Mark. “What Explains The Partisan Divide Between Urban And Non-Urban Areas.” \textit{Forbes}, Forbes Magazine, 4 Dec. 2012, www.forbes.com/sites/markhendrickson/2012/11/15/what-explains-the-partisan-divide-between-urban-and-non-urban-areas/\#6b23253133ea.
+			
+				\bibitem{njcensus}
+			“New Jersey Election Results 2016: House Live Map by District, Real-Time Voting Updates.” \textit{Election Hub}. www.politico.com/2016-election/results/map/house/new-jersey/.
+			
+			\bibitem{nccensus}
+			“North Carolina Election Results 2016: House Live Map by District, Real-Time Voting Updates.” \textit{Election Hub} www.politico.com/2016-election/results/map/house/north-carolina/.
+			
+			\bibitem{pierce}
+			Pierce, Olga, et al. “Redistricting, a Devil's Dictionary.” \textit{ProPublica}, 9 Mar. 2019, www.propublica.org/article/redistricting-a-devils-dictionary.
+			
+			\bibitem{njdistrictdata}
+			U.S. Census Bureau. \textit{District Maps for New Jersey}.  U.S. Government Printing Office, Washington DC, 2017.
+			
+			\bibitem{ncdistrictdata}
+			U.S. Census Bureau. \textit{District Maps for North Carolina}.  U.S. Government Printing Office, Washington DC, 2017.
+			
+			
+			
+			\bibitem{trickey}
+			Trickey, Erick. “Where Did the Term ‘Gerrymander’ Come From?” Smithsonian.com, \textit{Smithsonian Institution}, 20 July 2017, www.smithsonianmag.com/history/where-did-term-gerrymander-come-180964118/.
+		
+		\end{thebibliography}
+		
+\end{document}
+
+
